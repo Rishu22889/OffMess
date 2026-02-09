@@ -234,18 +234,10 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
         # Create session token
         access_token = create_access_token(user.id, user.role.value)
         
-        # Create redirect response to frontend
-        redirect_response = RedirectResponse(url=f"{settings.frontend_url}/auth/callback")
-        redirect_response.set_cookie(
-            settings.cookie_name,
-            access_token,
-            httponly=True,
-            samesite="none" if settings.frontend_url.startswith("https") else "lax",
-            secure=settings.frontend_url.startswith("https"),
-            path="/",
-        )
-        
-        return redirect_response
+        # Redirect to frontend with token in URL
+        # Frontend will extract token and make authenticated request
+        redirect_url = f"{settings.frontend_url}/auth/callback?token={access_token}"
+        return RedirectResponse(url=redirect_url)
         
     except Exception as e:
         print(f"OAuth error: {e}")
@@ -256,6 +248,45 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
 def logout(response: Response):
     response.delete_cookie(settings.cookie_name)
     return {"status": "ok"}
+
+
+class TokenExchangeRequest(BaseModel):
+    token: str
+
+
+@app.post("/auth/exchange-token", response_model=AuthResponse)
+def exchange_token(payload: TokenExchangeRequest, response: Response, db: Session = Depends(get_db)):
+    """Exchange OAuth token for cookie-based session"""
+    from .auth import decode_token
+    
+    try:
+        # Decode and validate token
+        token_data = decode_token(payload.token)
+        user_id = token_data.get("sub")
+        
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        
+        # Fetch user
+        user = db.get(User, int(user_id))
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Set cookie
+        response.set_cookie(
+            settings.cookie_name,
+            payload.token,
+            httponly=True,
+            samesite="none" if settings.frontend_url.startswith("https") else "lax",
+            secure=settings.frontend_url.startswith("https"),
+            path="/",
+            max_age=settings.access_token_expire_minutes * 60,
+        )
+        
+        return {"user": UserOut.model_validate(user), "access_token": payload.token}
+    except Exception as e:
+        print(f"Token exchange error: {e}")
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
 
 
 @app.get("/auth/me", response_model=UserOut)
