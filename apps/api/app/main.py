@@ -181,8 +181,10 @@ def login(payload: LoginRequest, response: Response, db: Session = Depends(get_d
         settings.cookie_name,
         token,
         httponly=True,
-        samesite="lax",
+        samesite="none" if settings.frontend_url.startswith("https") else "lax",
+        secure=settings.frontend_url.startswith("https"),
         path="/",
+        max_age=settings.access_token_expire_minutes * 60,
     )
     return {"user": UserOut.model_validate(user), "access_token": token}
 
