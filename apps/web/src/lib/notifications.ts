@@ -50,8 +50,9 @@ async function showNotificationViaServiceWorker(title: string, options?: Notific
       await registration.showNotification(title, {
         icon: "/icon-192.png",
         badge: "/icon-192.png",
-        vibrate: [200, 100, 200],
         ...options,
+        // @ts-ignore - vibrate is supported but not in TypeScript types
+        vibrate: [200, 100, 200],
       });
       return true;
     } catch (error) {
