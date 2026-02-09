@@ -5,7 +5,6 @@ import { apiFetch, getSocketUrl } from "@/lib/api";
 import { MenuItem, Order, OrderResponse, OrderStatus, PaymentMethod } from "@/lib/types";
 import { useAuth } from "@/components/AuthProvider";
 import StatusBadge from "@/components/StatusBadge";
-import { QRCodeSVG } from "qrcode.react";
 import { requestNotificationPermission, notifyNewOrder } from "@/lib/notifications";
 import NotificationButton from "@/components/NotificationButton";
 

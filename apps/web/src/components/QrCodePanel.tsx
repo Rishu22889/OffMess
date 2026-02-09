@@ -1,6 +1,7 @@
 "use client";
 
-import { QRCodeSVG } from "qrcode.react";
+import { useEffect, useRef } from "react";
+import QRCode from "qrcode";
 
 interface QrCodePanelProps {
   payload: string;
@@ -8,6 +9,22 @@ interface QrCodePanelProps {
 }
 
 export default function QrCodePanel({ payload, method = "UPI_QR" }: QrCodePanelProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    if (canvasRef.current && payload) {
+      const size = window.innerWidth < 640 ? 150 : 180;
+      QRCode.toCanvas(canvasRef.current, payload, {
+        width: size,
+        margin: 2,
+        color: {
+          dark: "#000000",
+          light: "#FFFFFF",
+        },
+      });
+    }
+  }, [payload]);
+
   const handlePayWithUPI = () => {
     // Open UPI deep link to launch UPI apps on mobile
     window.location.href = payload;
@@ -21,7 +38,7 @@ export default function QrCodePanel({ payload, method = "UPI_QR" }: QrCodePanelP
       </div>
       <div className="flex justify-center mb-4">
         <div className="p-4 bg-white rounded-xl">
-          <QRCodeSVG value={payload} size={window.innerWidth < 640 ? 150 : 180} />
+          <canvas ref={canvasRef} />
         </div>
       </div>
       
