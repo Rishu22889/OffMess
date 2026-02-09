@@ -165,17 +165,11 @@ export default function LoginPage() {
         {error && <p className="text-xs sm:text-sm text-red-400">{error}</p>}
         <button
           type="submit"
-          className="rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 px-4 py-2 sm:py-3 text-sm sm:text-base text-neutral-900 dark:text-white font-bold transition-all"
+          className="rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 px-4 py-2 sm:py-3 text-sm sm:text-base text-white font-bold transition-all"
         >
           Login
         </button>
       </form>
-      
-      <div className="mt-4 sm:mt-6 text-xs text-neutral-600 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 p-3 rounded-lg">
-        <p className="font-medium mb-1 text-neutral-700 dark:text-neutral-300">Test Credentials:</p>
-        <p className="break-all">Canteen Admin: main_canteen@campus.test / admin123</p>
-        <p className="break-all">Campus Admin: campus.admin@campus.test / admin123</p>
-      </div>
     </div>
   );
 }
