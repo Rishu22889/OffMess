@@ -85,14 +85,17 @@ DATABASE_URL=sqlite:///./canteen.db
 GOOGLE_CLIENT_ID=your-google-oauth-client-id
 GOOGLE_CLIENT_SECRET=your-google-oauth-client-secret
 ALLOWED_DOMAIN=iitism.ac.in
-GOOGLE_REDIRECT_URI=https://your-app.vercel.app/auth/callback
+GOOGLE_REDIRECT_URI=https://your-backend.onrender.com/auth/google/callback
+FRONTEND_URL=https://your-app.vercel.app
 PYTHON_VERSION=3.11.0
 ```
 
-**Generate JWT_SECRET:**
-```bash
-openssl rand -hex 32
-```
+**Important Notes:**
+- **JWT_SECRET**: Generate a secure secret using: `openssl rand -hex 32`
+- **GOOGLE_CLIENT_ID** and **GOOGLE_CLIENT_SECRET**: Get from Google Cloud Console OAuth credentials
+- **GOOGLE_REDIRECT_URI**: This is your BACKEND URL + `/auth/google/callback` (e.g., `https://offmess-api.onrender.com/auth/google/callback`)
+- **FRONTEND_URL**: This is your Vercel frontend URL (e.g., `https://offmess.vercel.app`)
+- You'll need to update FRONTEND_URL after deploying to Vercel in Step 3
 
 #### 2.5 Deploy
 1. Click "Create Web Service"
@@ -284,9 +287,15 @@ Now that you have your Vercel URL:
 4. Your backend will auto-redeploy (Render/Fly.io)
 
 ### 3.7 Update Google OAuth Redirect URI
-1. Go to Google Cloud Console
-2. Update OAuth redirect URI to: `https://your-app.vercel.app/auth/callback`
-3. Update backend environment variable `GOOGLE_REDIRECT_URI` on your hosting platform
+1. Go to [Google Cloud Console](https://console.cloud.google.com)
+2. Navigate to "APIs & Services" → "Credentials"
+3. Click on your OAuth 2.0 Client ID
+4. Under "Authorized redirect URIs", add:
+   - `https://your-backend.onrender.com/auth/google/callback` (your actual backend URL)
+5. Click "Save"
+6. Update backend environment variable `FRONTEND_URL` on Render to: `https://your-app.vercel.app` (your actual Vercel URL)
+
+**Important:** The redirect URI in Google Console must match your BACKEND URL (where the OAuth callback is handled), not your frontend URL.
 
 ---
 

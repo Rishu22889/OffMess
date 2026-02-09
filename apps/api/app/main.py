@@ -79,7 +79,13 @@ app.add_middleware(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001", "http://127.0.0.1:3001"],
+    allow_origins=[
+        "http://localhost:3000", 
+        "http://127.0.0.1:3000", 
+        "http://localhost:3001", 
+        "http://127.0.0.1:3001",
+        "https://offmess.vercel.app",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -197,15 +203,15 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
         
         if not user_info:
             # Redirect to login with error
-            return RedirectResponse(url="http://localhost:3000/login?error=no_user_info")
+            return RedirectResponse(url=f"{settings.frontend_url}/login?error=no_user_info")
         
         email = user_info.get('email')
         if not email:
-            return RedirectResponse(url="http://localhost:3000/login?error=no_email")
+            return RedirectResponse(url=f"{settings.frontend_url}/login?error=no_email")
         
         # Check if email is from allowed domain
         if not email.endswith(f"@{settings.allowed_domain}"):
-            return RedirectResponse(url=f"http://localhost:3000/login?error=invalid_domain")
+            return RedirectResponse(url=f"{settings.frontend_url}/login?error=invalid_domain")
         
         # Extract roll number from email (e.g., 21je0001@iitism.ac.in -> 21JE0001)
         roll_number = email.split('@')[0].upper()
@@ -229,21 +235,21 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
         access_token = create_access_token(user.id, user.role.value)
         
         # Create redirect response to frontend
-        redirect_response = RedirectResponse(url="http://localhost:3000/auth/callback")
+        redirect_response = RedirectResponse(url=f"{settings.frontend_url}/auth/callback")
         redirect_response.set_cookie(
             settings.cookie_name,
             access_token,
             httponly=True,
-            samesite="lax",
+            samesite="none" if settings.frontend_url.startswith("https") else "lax",
+            secure=settings.frontend_url.startswith("https"),
             path="/",
-            domain="localhost",  # Set domain for cross-origin cookie
         )
         
         return redirect_response
         
     except Exception as e:
         print(f"OAuth error: {e}")
-        return RedirectResponse(url=f"http://localhost:3000/login?error=auth_failed")
+        return RedirectResponse(url=f"{settings.frontend_url}/login?error=auth_failed")
 
 
 @app.post("/auth/logout")

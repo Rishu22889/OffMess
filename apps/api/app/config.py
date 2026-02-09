@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     google_client_secret: str = ""
     google_redirect_uri: str = "http://localhost:8000/auth/google/callback"
     allowed_domain: str = "iitism.ac.in"
+    
+    # Frontend URL for OAuth redirects
+    frontend_url: str = "http://localhost:3000"
 
     class Config:
         env_file = ".env"
