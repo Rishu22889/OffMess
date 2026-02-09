@@ -1,0 +1,60 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Node
+node_modules/
+.next/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Database
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+server.log
+
+# Test files
+*_cookies.txt
+cookies.txt
+
+# Temporary files
+websocket_test.html
+
+# Documentation (keep only essential)
+CHANGES_SUMMARY.md
+DARK_MODE_ONLY.md
+DEPLOYMENT_STATUS.md
+LIGHT_MODE_FIX_INSTRUCTIONS.md
+LIGHT_MODE_UPDATE.md
+PROJECT_ARCHITECTURE_QUESTIONNAIRE.md
+READY_FOR_DEPLOYMENT.md
+
+# Kiro specs (optional - remove if you don't want to commit)
+.kiro/
