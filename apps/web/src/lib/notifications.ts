@@ -42,24 +42,49 @@ function playNotificationSound() {
   }
 }
 
-export function showNotification(title: string, options?: NotificationOptions) {
-  if (Notification.permission === "granted") {
+// Show notification using Service Worker (works in background on mobile)
+async function showNotificationViaServiceWorker(title: string, options?: NotificationOptions) {
+  if ('serviceWorker' in navigator && Notification.permission === "granted") {
     try {
-      const notification = new Notification(title, {
-        icon: "/favicon.ico",
-        badge: "/favicon.ico",
+      const registration = await navigator.serviceWorker.ready;
+      await registration.showNotification(title, {
+        icon: "/icon-192.png",
+        badge: "/icon-192.png",
+        vibrate: [200, 100, 200],
         ...options,
       });
+      return true;
+    } catch (error) {
+      console.error("Failed to show notification via service worker:", error);
+      return false;
+    }
+  }
+  return false;
+}
+
+export async function showNotification(title: string, options?: NotificationOptions) {
+  if (Notification.permission === "granted") {
+    try {
+      // Try service worker first (works in background on mobile)
+      const swSuccess = await showNotificationViaServiceWorker(title, options);
+      
+      if (!swSuccess) {
+        // Fallback to regular notification (works when app is open)
+        const notification = new Notification(title, {
+          icon: "/favicon.ico",
+          badge: "/favicon.ico",
+          ...options,
+        });
+        
+        // Auto-close after 10 seconds if not requireInteraction
+        if (!options?.requireInteraction) {
+          setTimeout(() => notification.close(), 10000);
+        }
+      }
       
       // Play sound when notification is shown
       playNotificationSound();
       
-      // Auto-close after 10 seconds if not requireInteraction
-      if (!options?.requireInteraction) {
-        setTimeout(() => notification.close(), 10000);
-      }
-      
-      return notification;
     } catch (error) {
       console.error("Failed to show notification:", error);
     }
@@ -74,6 +99,7 @@ export function notifyNewOrder(orderId: number, studentName: string, amount: num
     body: `Order #${orderId} from ${studentName}\nAmount: ₹${amount.toFixed(2)}`,
     tag: `order-${orderId}`,
     requireInteraction: true,
+    data: { url: '/admin', orderId },
   });
 }
 
@@ -87,6 +113,7 @@ export function notifyOrderReady(orderId: number, pickupCode: string) {
     body: `Order #${orderId} is ready for pickup\nPickup Code: ${pickupCode}`,
     tag: `order-${orderId}`,
     requireInteraction: true,
+    data: { url: `/orders/${orderId}`, orderId },
   });
 }
 
@@ -94,6 +121,7 @@ export function notifyOrderAccepted(orderId: number) {
   showNotification("✅ Order Accepted!", {
     body: `Order #${orderId} has been accepted by the canteen`,
     tag: `order-${orderId}`,
+    data: { url: `/orders/${orderId}`, orderId },
   });
 }
 
@@ -101,5 +129,6 @@ export function notifyOrderPreparing(orderId: number) {
   showNotification("👨‍🍳 Order Being Prepared", {
     body: `Order #${orderId} is now being prepared`,
     tag: `order-${orderId}`,
+    data: { url: `/orders/${orderId}`, orderId },
   });
 }
