@@ -52,15 +52,15 @@ git remote add origin https://github.com/YOUR_USERNAME/offmess.git
 git push -u origin main
 ```
 
-### Step 3: Deploy Backend to Railway
-Follow the detailed guide in `VERCEL_DEPLOYMENT_GUIDE.md` - Section "Step 2: Deploy Backend to Railway"
+### Step 3: Deploy Backend to Render (or Alternative)
+Follow the detailed guide in `VERCEL_DEPLOYMENT_GUIDE.md` - Section "Step 2: Deploy Backend"
 
 **Quick Summary:**
-1. Sign up at https://railway.app
+1. Sign up at https://render.com (recommended) or choose alternative
 2. Deploy from GitHub repo
 3. Set root directory: `apps/api`
 4. Add environment variables
-5. Get your Railway URL
+5. Get your backend URL
 
 ### Step 4: Deploy Frontend to Vercel
 Follow the detailed guide in `VERCEL_DEPLOYMENT_GUIDE.md` - Section "Step 3: Deploy Frontend to Vercel"
@@ -70,8 +70,8 @@ Follow the detailed guide in `VERCEL_DEPLOYMENT_GUIDE.md` - Section "Step 3: Dep
 2. Import your GitHub repo
 3. Set root directory: `apps/web`
 4. Add environment variables:
-   - `NEXT_PUBLIC_API_URL=https://your-backend.railway.app`
-   - `NEXT_PUBLIC_WS_URL=wss://your-backend.railway.app`
+   - `NEXT_PUBLIC_API_URL=https://your-backend.onrender.com`
+   - `NEXT_PUBLIC_WS_URL=wss://your-backend.onrender.com`
 5. Deploy!
 
 ---
@@ -87,13 +87,13 @@ Follow the detailed guide in `VERCEL_DEPLOYMENT_GUIDE.md` - Section "Step 3: Dep
 ### Before Deploying:
 - [ ] GitHub repository created
 - [ ] Code pushed to GitHub
-- [ ] Railway account created
+- [ ] Render account created (or alternative hosting)
 - [ ] Vercel account created
 - [ ] Google OAuth credentials ready
 - [ ] JWT secret generated
 
 ### After Deploying:
-- [ ] Backend deployed on Railway
+- [ ] Backend deployed on Render (or alternative)
 - [ ] Frontend deployed on Vercel
 - [ ] Environment variables configured
 - [ ] CORS updated with Vercel URL
@@ -104,7 +104,7 @@ Follow the detailed guide in `VERCEL_DEPLOYMENT_GUIDE.md` - Section "Step 3: Dep
 
 ## 🔐 Important Environment Variables
 
-### Backend (Railway):
+### Backend (Render/Fly.io/PythonAnywhere):
 ```env
 JWT_SECRET=<generate with: openssl rand -hex 32>
 DATABASE_URL=sqlite:///./canteen.db
@@ -116,8 +116,8 @@ GOOGLE_REDIRECT_URI=https://your-app.vercel.app/auth/callback
 
 ### Frontend (Vercel):
 ```env
-NEXT_PUBLIC_API_URL=https://your-backend.railway.app
-NEXT_PUBLIC_WS_URL=wss://your-backend.railway.app
+NEXT_PUBLIC_API_URL=https://your-backend.onrender.com
+NEXT_PUBLIC_WS_URL=wss://your-backend.onrender.com
 ```
 
 ---

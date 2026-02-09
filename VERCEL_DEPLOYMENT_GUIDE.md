@@ -12,7 +12,7 @@
 
 ### 🔲 To Complete:
 - [ ] Commit code to GitHub
-- [ ] Deploy backend to Railway
+- [ ] Deploy backend to Render (or alternative)
 - [ ] Deploy frontend to Vercel
 - [ ] Configure environment variables
 - [ ] Test deployment
@@ -52,28 +52,32 @@ git push -u origin main
 
 ---
 
-## 🖥️ Step 2: Deploy Backend to Railway
+## 🖥️ Step 2: Deploy Backend (Choose One Option)
 
-### 2.1 Sign Up for Railway
-1. Go to https://railway.app
+### Option A: Render.com (Recommended - Free Tier Available)
+
+#### 2.1 Sign Up for Render
+1. Go to https://render.com
 2. Sign up with GitHub
-3. Authorize Railway to access your repositories
+3. Authorize Render to access your repositories
 
-### 2.2 Create New Project
-1. Click "New Project"
-2. Select "Deploy from GitHub repo"
-3. Choose your `offmess` repository
-4. Click "Deploy Now"
+#### 2.2 Create New Web Service
+1. Click "New +" → "Web Service"
+2. Connect your GitHub repository
+3. Select your `offmess` repository
 
-### 2.3 Configure Backend Service
-1. After deployment starts, click on the service
-2. Go to "Settings" tab
-3. **Root Directory**: Set to `apps/api`
-4. **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-5. **Build Command**: Leave empty (Railway auto-detects)
+#### 2.3 Configure Service
+- **Name**: `offmess-api` (or your choice)
+- **Region**: Choose closest to your users
+- **Branch**: `main`
+- **Root Directory**: `apps/api`
+- **Runtime**: `Python 3`
+- **Build Command**: `pip install -r requirements.txt`
+- **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+- **Instance Type**: `Free` (select free tier)
 
-### 2.4 Add Environment Variables
-Go to "Variables" tab and add:
+#### 2.4 Add Environment Variables
+Click "Advanced" → "Add Environment Variable":
 
 ```env
 JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
@@ -82,18 +86,134 @@ GOOGLE_CLIENT_ID=your-google-oauth-client-id
 GOOGLE_CLIENT_SECRET=your-google-oauth-client-secret
 ALLOWED_DOMAIN=iitism.ac.in
 GOOGLE_REDIRECT_URI=https://your-app.vercel.app/auth/callback
+PYTHON_VERSION=3.11.0
 ```
 
-**Important Notes:**
-- Generate a strong JWT_SECRET: `openssl rand -hex 32`
-- You'll update GOOGLE_REDIRECT_URI after deploying frontend
-- For production, consider using PostgreSQL instead of SQLite
+**Generate JWT_SECRET:**
+```bash
+openssl rand -hex 32
+```
 
-### 2.5 Get Your Backend URL
-1. Go to "Settings" tab
-2. Under "Domains", you'll see your Railway URL
-3. Copy it (e.g., `https://offmess-production.up.railway.app`)
-4. **Save this URL** - you'll need it for frontend deployment
+#### 2.5 Deploy
+1. Click "Create Web Service"
+2. Wait 5-10 minutes for first deployment
+3. Your backend URL will be: `https://offmess-api.onrender.com`
+4. **Save this URL** - you'll need it for frontend
+
+**Note:** Free tier sleeps after 15 minutes of inactivity. First request after sleep takes ~30 seconds.
+
+---
+
+### Option B: PythonAnywhere (Alternative Free Option)
+
+#### 2.1 Sign Up
+1. Go to https://www.pythonanywhere.com
+2. Create a free "Beginner" account
+
+#### 2.2 Upload Code
+1. Go to "Files" tab
+2. Upload your `apps/api` folder
+3. Or clone from GitHub using console
+
+#### 2.3 Create Web App
+1. Go to "Web" tab
+2. Click "Add a new web app"
+3. Choose "Manual configuration"
+4. Select Python 3.10
+
+#### 2.4 Configure WSGI
+1. Edit WSGI configuration file
+2. Add:
+```python
+import sys
+path = '/home/yourusername/apps/api'
+if path not in sys.path:
+    sys.path.append(path)
+
+from app.main import app as application
+```
+
+#### 2.5 Install Dependencies
+Open Bash console:
+```bash
+cd apps/api
+pip install -r requirements.txt
+```
+
+#### 2.6 Set Environment Variables
+In web app configuration, add environment variables
+
+Your URL: `https://yourusername.pythonanywhere.com`
+
+---
+
+### Option C: Fly.io (Good Free Tier)
+
+#### 2.1 Install Fly CLI
+```bash
+# macOS
+brew install flyctl
+
+# Or download from https://fly.io/docs/hands-on/install-flyctl/
+```
+
+#### 2.2 Sign Up and Login
+```bash
+flyctl auth signup
+flyctl auth login
+```
+
+#### 2.3 Create fly.toml
+Create `apps/api/fly.toml`:
+```toml
+app = "offmess-api"
+
+[build]
+  builder = "paketobuildpacks/builder:base"
+
+[env]
+  PORT = "8080"
+
+[[services]]
+  http_checks = []
+  internal_port = 8080
+  processes = ["app"]
+  protocol = "tcp"
+
+  [[services.ports]]
+    force_https = true
+    handlers = ["http"]
+    port = 80
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
+```
+
+#### 2.4 Deploy
+```bash
+cd apps/api
+flyctl launch
+flyctl secrets set JWT_SECRET=your-secret
+flyctl secrets set GOOGLE_CLIENT_ID=your-id
+flyctl secrets set GOOGLE_CLIENT_SECRET=your-secret
+flyctl secrets set ALLOWED_DOMAIN=iitism.ac.in
+flyctl deploy
+```
+
+Your URL: `https://offmess-api.fly.dev`
+
+---
+
+### 🎯 Recommended: Use Render.com
+
+**Why Render?**
+- ✅ Easy setup (similar to Railway)
+- ✅ Free tier available
+- ✅ Auto-deploys from GitHub
+- ✅ Good performance
+- ✅ SSL included
+- ⚠️ Sleeps after 15 min inactivity (acceptable for campus use)
 
 ### 2.6 Update CORS in Backend
 Before deploying frontend, update `apps/api/app/main.py`:
@@ -112,7 +232,7 @@ app.add_middleware(
 )
 ```
 
-Commit and push this change - Railway will auto-redeploy.
+Commit and push this change - Render will auto-redeploy.
 
 ---
 
@@ -142,11 +262,13 @@ Vercel should auto-detect Next.js. Verify these settings:
 Click "Environment Variables" and add:
 
 ```env
-NEXT_PUBLIC_API_URL=https://your-backend.railway.app
-NEXT_PUBLIC_WS_URL=wss://your-backend.railway.app
+NEXT_PUBLIC_API_URL=https://your-backend.onrender.com
+NEXT_PUBLIC_WS_URL=wss://your-backend.onrender.com
 ```
 
-**Replace** `your-backend.railway.app` with your actual Railway URL from Step 2.5
+**Replace** `your-backend.onrender.com` with your actual backend URL from Step 2.
+
+**Note:** If using PythonAnywhere or Fly.io, use their respective URLs.
 
 ### 3.5 Deploy
 1. Click "Deploy"
@@ -159,12 +281,12 @@ Now that you have your Vercel URL:
 1. Go back to `apps/api/app/main.py`
 2. Update CORS origins with your actual Vercel URL
 3. Commit and push
-4. Railway will auto-redeploy
+4. Your backend will auto-redeploy (Render/Fly.io)
 
 ### 3.7 Update Google OAuth Redirect URI
 1. Go to Google Cloud Console
 2. Update OAuth redirect URI to: `https://your-app.vercel.app/auth/callback`
-3. Update Railway environment variable `GOOGLE_REDIRECT_URI`
+3. Update backend environment variable `GOOGLE_REDIRECT_URI` on your hosting platform
 
 ---
 
@@ -182,7 +304,7 @@ Update `apps/web/vercel.json` with your actual backend URL:
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://your-backend.railway.app/:path*"
+      "destination": "https://your-backend.onrender.com/:path*"
     }
   ],
   "headers": [
@@ -211,6 +333,8 @@ Update `apps/web/vercel.json` with your actual backend URL:
   ]
 }
 ```
+
+**Replace** `your-backend.onrender.com` with your actual backend URL.
 
 Commit and push - Vercel will auto-redeploy.
 
@@ -283,7 +407,8 @@ Update redirect URI to use custom domain
 ### API Connection Issues
 - **Verify environment variables**: Check NEXT_PUBLIC_API_URL is correct
 - **Check CORS**: Make sure backend allows your Vercel domain
-- **Test backend directly**: Visit your Railway URL to ensure it's running
+- **Test backend directly**: Visit your backend URL to ensure it's running
+- **Check logs**: Review logs on your hosting platform (Render/Fly.io/PythonAnywhere)
 
 ### Icons Not Showing
 - **Check file paths**: Icons should be in `apps/web/public/`
@@ -297,8 +422,8 @@ Update redirect URI to use custom domain
 
 ### Database Issues
 - **SQLite limitations**: Consider PostgreSQL for production
-- **Railway PostgreSQL**: Free tier available, more reliable
-- **Data persistence**: SQLite on Railway may lose data on redeploy
+- **Render PostgreSQL**: Free PostgreSQL available on Render
+- **Data persistence**: SQLite may lose data on redeploy (use PostgreSQL for production)
 
 ---
 
@@ -309,11 +434,20 @@ Update redirect URI to use custom domain
 2. Click "Analytics" tab
 3. Monitor page views, performance, errors
 
-### Railway Logs
-1. Go to your Railway project
+### Backend Logs
+**For Render:**
+1. Go to your Render dashboard
 2. Click on your service
-3. View "Deployments" → "Logs"
-4. Monitor for errors
+3. View "Logs" tab
+
+**For Fly.io:**
+```bash
+flyctl logs
+```
+
+**For PythonAnywhere:**
+1. Go to "Web" tab
+2. View error log and server log
 
 ### Error Tracking (Optional)
 Consider adding:
@@ -338,7 +472,7 @@ Consider adding:
 ## 🎉 Success Checklist
 
 - [ ] Code committed to GitHub
-- [ ] Backend deployed on Railway
+- [ ] Backend deployed on Render (or alternative)
 - [ ] Frontend deployed on Vercel
 - [ ] Environment variables configured
 - [ ] Google OAuth working
@@ -355,9 +489,9 @@ Consider adding:
 
 ### Important URLs
 - **GitHub Repo**: https://github.com/YOUR_USERNAME/offmess
-- **Railway Dashboard**: https://railway.app/dashboard
+- **Render Dashboard**: https://dashboard.render.com
 - **Vercel Dashboard**: https://vercel.com/dashboard
-- **Backend URL**: https://your-backend.railway.app
+- **Backend URL**: https://your-backend.onrender.com (or your chosen platform)
 - **Frontend URL**: https://your-app.vercel.app
 
 ### Commands
@@ -378,6 +512,6 @@ vercel logs    # View logs
 
 Follow the steps above in order, and your OffMess app will be live in about 30 minutes!
 
-**Need help?** Check the troubleshooting section or review the logs on Railway/Vercel.
+**Need help?** Check the troubleshooting section or review the logs on Render/Vercel.
 
 Good luck! 🎉
