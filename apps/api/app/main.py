@@ -303,19 +303,26 @@ def register_campus_admin(payload: CampusAdminRegisterRequest, response: Respons
     One-time setup endpoint to create a campus admin account.
     Requires a setup key for security.
     """
+    print(f"Campus admin registration attempt for email: {payload.email}")
+    
     # Check setup key (you can set this in environment variables)
     expected_key = settings.jwt_secret[:16]  # Use first 16 chars of JWT secret as setup key
+    print(f"Checking setup key... Expected length: {len(expected_key)}, Provided length: {len(payload.setup_key)}")
+    
     if payload.setup_key != expected_key:
+        print(f"Setup key mismatch!")
         raise HTTPException(status_code=403, detail="Invalid setup key")
     
     # Check if campus admin already exists
     existing_admin = db.scalar(select(User).where(User.role == UserRole.CAMPUS_ADMIN))
     if existing_admin:
+        print(f"Campus admin already exists: {existing_admin.email}")
         raise HTTPException(status_code=400, detail="Campus admin already exists. Contact support to reset.")
     
     # Check if email is already taken
     existing_user = db.scalar(select(User).where(User.email == payload.email))
     if existing_user:
+        print(f"Email already registered: {payload.email}")
         raise HTTPException(status_code=400, detail="Email already registered")
     
     # Create campus admin
