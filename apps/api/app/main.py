@@ -289,6 +289,61 @@ def exchange_token(payload: TokenExchangeRequest, response: Response, db: Sessio
         raise HTTPException(status_code=401, detail="Invalid or expired token")
 
 
+class CampusAdminRegisterRequest(BaseModel):
+    email: str
+    password: str
+    name: str
+    phone_number: str
+    setup_key: str  # Secret key to prevent unauthorized registration
+
+
+@app.post("/auth/register-campus-admin", response_model=AuthResponse)
+def register_campus_admin(payload: CampusAdminRegisterRequest, response: Response, db: Session = Depends(get_db)):
+    """
+    One-time setup endpoint to create a campus admin account.
+    Requires a setup key for security.
+    """
+    # Check setup key (you can set this in environment variables)
+    expected_key = settings.jwt_secret[:16]  # Use first 16 chars of JWT secret as setup key
+    if payload.setup_key != expected_key:
+        raise HTTPException(status_code=403, detail="Invalid setup key")
+    
+    # Check if campus admin already exists
+    existing_admin = db.scalar(select(User).where(User.role == UserRole.CAMPUS_ADMIN))
+    if existing_admin:
+        raise HTTPException(status_code=400, detail="Campus admin already exists. Contact support to reset.")
+    
+    # Check if email is already taken
+    existing_user = db.scalar(select(User).where(User.email == payload.email))
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # Create campus admin
+    admin = User(
+        role=UserRole.CAMPUS_ADMIN,
+        email=payload.email,
+        password_hash=hash_password(payload.password),
+        name=payload.name,
+        phone_number=payload.phone_number,
+    )
+    db.add(admin)
+    db.commit()
+    db.refresh(admin)
+    
+    # Create session token
+    token = create_access_token(admin.id, admin.role.value)
+    response.set_cookie(
+        settings.cookie_name,
+        token,
+        httponly=True,
+        samesite="none" if settings.frontend_url.startswith("https") else "lax",
+        secure=settings.frontend_url.startswith("https"),
+        path="/",
+    )
+    
+    return {"user": UserOut.model_validate(admin), "access_token": token}
+
+
 @app.get("/auth/me", response_model=UserOut)
 def me(user: User = Depends(get_current_user)):
     return UserOut.model_validate(user)
