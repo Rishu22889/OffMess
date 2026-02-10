@@ -1263,12 +1263,20 @@ def update_canteen_admin_email(
     db: Session = Depends(get_db),
     user: User = Depends(require_role(UserRole.CAMPUS_ADMIN)),
 ):
-    """Campus Admin can update the email of a canteen admin"""
+    """Campus Admin can update the email of a canteen admin or create one if it doesn't exist"""
+    import secrets
+    import string
+    
     new_email = payload.get("new_email", "").strip()
     if not new_email:
         raise HTTPException(status_code=400, detail="Email is required")
     
-    # Check if email is already in use
+    # Verify canteen exists
+    canteen = db.scalar(select(Canteen).where(Canteen.id == canteen_id))
+    if not canteen:
+        raise HTTPException(status_code=404, detail="Canteen not found")
+    
+    # Check if email is already in use by another user
     existing_user = db.scalar(select(User).where(User.email == new_email))
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already in use")
@@ -1281,15 +1289,43 @@ def update_canteen_admin_email(
         )
     )
     
-    if not canteen_admin:
-        raise HTTPException(status_code=404, detail="Canteen admin not found")
-    
-    # Update email
-    canteen_admin.email = new_email
-    db.commit()
-    db.refresh(canteen_admin)
-    
-    return {"status": "ok", "message": "Email updated successfully", "user": UserOut.model_validate(canteen_admin)}
+    if canteen_admin:
+        # Update existing admin's email
+        canteen_admin.email = new_email
+        db.commit()
+        db.refresh(canteen_admin)
+        
+        return {
+            "status": "ok", 
+            "message": "Email updated successfully", 
+            "user": UserOut.model_validate(canteen_admin),
+            "is_new_user": False
+        }
+    else:
+        # Create new canteen admin user
+        # Generate temporary password (8 characters: letters + digits)
+        temp_password = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(8))
+        
+        new_admin = User(
+            role=UserRole.CANTEEN_ADMIN,
+            email=new_email,
+            password_hash=hash_password(temp_password),
+            canteen_id=canteen_id,
+            name=f"{canteen.name} Admin",
+            phone_number=""
+        )
+        
+        db.add(new_admin)
+        db.commit()
+        db.refresh(new_admin)
+        
+        return {
+            "status": "ok",
+            "message": "Canteen admin created successfully",
+            "user": UserOut.model_validate(new_admin),
+            "is_new_user": True,
+            "temporary_password": temp_password
+        }
 
 
 # Campus Admin Mess Menu Management Endpoints

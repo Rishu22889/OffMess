@@ -258,13 +258,25 @@ export default function CampusAdminPage() {
     setLoading(true);
     setError(null);
     try {
-      await apiFetch(`/campus/canteens/${canteenId}/admin-email`, {
+      const response = await apiFetch(`/campus/canteens/${canteenId}/admin-email`, {
         method: "PUT",
         body: JSON.stringify({ new_email: newEmail }),
       });
+      
       setEditingEmail(null);
       setNewEmail("");
       await loadCanteens();
+      
+      // If a new user was created, show the temporary password
+      if (response.is_new_user && response.temporary_password) {
+        alert(
+          `Canteen admin account created successfully!\n\n` +
+          `Email: ${response.user.email}\n` +
+          `Temporary Password: ${response.temporary_password}\n\n` +
+          `Please share these credentials with the canteen admin. ` +
+          `They should change their password after first login.`
+        );
+      }
     } catch (err: any) {
       setError(`Failed to update email: ${err?.message || 'Unknown error'}`);
     } finally {
