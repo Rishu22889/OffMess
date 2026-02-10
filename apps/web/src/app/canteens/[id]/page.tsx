@@ -252,7 +252,7 @@ export default function CanteenMenuPage() {
       {cart.length > 0 && (
         <button
           onClick={() => setCartOpen(true)}
-          className="fixed bottom-6 right-6 z-40 flex items-center gap-3 px-6 py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-neutral-900 dark:text-white font-bold shadow-2xl transition-all"
+          className="fixed bottom-24 md:bottom-6 right-6 z-40 flex items-center gap-3 px-6 py-4 rounded-2xl bg-orange-500 hover:bg-orange-600 text-neutral-900 dark:text-white font-bold shadow-2xl transition-all"
         >
           <div className="relative">
             <span className="text-2xl">🛒</span>
