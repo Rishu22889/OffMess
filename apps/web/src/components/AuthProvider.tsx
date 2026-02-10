@@ -30,8 +30,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
-    await doLogout();
+    // First set user to null immediately
     setUser(null);
+    
+    // Then call the logout API
+    try {
+      await doLogout();
+    } catch (err) {
+      console.error("Logout API error:", err);
+    }
+    
+    // The doLogout function will handle the redirect
   };
 
   useEffect(() => {
