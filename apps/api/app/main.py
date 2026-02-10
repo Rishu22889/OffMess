@@ -248,7 +248,15 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
 
 @app.post("/auth/logout")
 def logout(response: Response):
-    response.delete_cookie(settings.cookie_name)
+    # Delete cookie with all the same parameters used when setting it
+    response.delete_cookie(
+        settings.cookie_name,
+        path="/",
+        domain=None,
+        secure=settings.frontend_url.startswith("https"),
+        httponly=True,
+        samesite="none" if settings.frontend_url.startswith("https") else "lax",
+    )
     return {"status": "ok"}
 
 

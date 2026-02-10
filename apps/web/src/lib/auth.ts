@@ -10,9 +10,20 @@ export async function login(input: { email?: string; roll_number?: string; passw
 }
 
 export async function logout() {
-  await apiFetch("/auth/logout", { method: "POST" });
-  // Force redirect to login page
-  window.location.href = "/login";
+  try {
+    await apiFetch("/auth/logout", { method: "POST" });
+  } catch (err) {
+    console.error("Logout API call failed:", err);
+  }
+  
+  // Clear any local storage
+  if (typeof window !== 'undefined') {
+    localStorage.clear();
+    sessionStorage.clear();
+  }
+  
+  // Force full page reload to login (clears all state and cache)
+  window.location.replace("/login");
 }
 
 export async function me() {
