@@ -258,7 +258,13 @@ export default function CampusAdminPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await apiFetch(`/campus/canteens/${canteenId}/admin-email`, {
+      const response = await apiFetch<{
+        status: string;
+        message: string;
+        user: any;
+        is_new_user?: boolean;
+        temporary_password?: string;
+      }>(`/campus/canteens/${canteenId}/admin-email`, {
         method: "PUT",
         body: JSON.stringify({ new_email: newEmail }),
       });
