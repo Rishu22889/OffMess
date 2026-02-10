@@ -11,6 +11,8 @@ export async function login(input: { email?: string; roll_number?: string; passw
 
 export async function logout() {
   await apiFetch("/auth/logout", { method: "POST" });
+  // Force redirect to login page
+  window.location.href = "/login";
 }
 
 export async function me() {

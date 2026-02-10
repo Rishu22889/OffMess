@@ -137,15 +137,14 @@ def get_order_queue_position(db: Session, order: Order) -> dict:
 
 def get_admin_order_queue(db: Session, canteen_id: int) -> list[dict]:
     """Get ordered list of orders for admin dashboard"""
-    # Get all active orders ordered by priority, only including orders with successful payments for queue position
+    # Get all active orders ordered by paid_at (same as student view)
     orders = db.scalars(
         select(Order).where(
             Order.canteen_id == canteen_id,
             Order.status.in_([OrderStatus.PAYMENT_PENDING, OrderStatus.PAID, OrderStatus.PREPARING, OrderStatus.READY])
         ).order_by(
-            # Priority: READY first, then PREPARING, then PAID, then PAYMENT_PENDING
-            Order.status.desc(),
-            Order.paid_at.asc()  # Within same status, first paid gets priority
+            # Sort by paid_at ascending - first paid gets priority (same as queue position)
+            Order.paid_at.asc()
         )
     ).all()
     

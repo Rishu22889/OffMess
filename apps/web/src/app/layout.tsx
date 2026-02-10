@@ -3,6 +3,7 @@ import "./globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import NavBar from "@/components/NavBar";
+import BottomNav from "@/components/BottomNav";
 import PWAInstall from "@/components/PWAInstall";
 
 export const metadata: Metadata = {
@@ -56,10 +57,11 @@ export default function RootLayout({
       <body className="antialiased bg-white dark:bg-neutral-950">
         <ThemeProvider>
           <AuthProvider>
-            <div className="mx-auto flex min-h-screen max-w-6xl flex-col gap-4 px-4 py-4 sm:gap-6 sm:px-6 sm:py-6 lg:gap-8 lg:px-6 lg:py-8">
+            <div className="mx-auto flex min-h-screen max-w-6xl flex-col gap-4 px-4 py-4 pb-20 md:pb-4 sm:gap-6 sm:px-6 sm:py-6 lg:gap-8 lg:px-6 lg:py-8">
               <NavBar />
               <main className="flex-1">{children}</main>
             </div>
+            <BottomNav />
             <PWAInstall />
           </AuthProvider>
         </ThemeProvider>

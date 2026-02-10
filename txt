@@ -1,0 +1,9 @@
+curl -X POST https://offmess-api.onrender.com/auth/register-campus-admin \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "rishi_admin@offmess.com",
+    "password": "Risumi@1204",
+    "name": "Rishi Singh",
+    "phone_number": "+919693482676",
+    "setup_key": "2ae13280064b9f57"
+  }'

@@ -3,9 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
-import { Canteen, MenuItem, OrderResponse, PaymentMethod } from "@/lib/types";
+import { Canteen, MenuItem, OrderResponse } from "@/lib/types";
 import { useAuth } from "@/components/AuthProvider";
-import PaymentMethodSelector from "@/components/PaymentMethodSelector";
 
 interface CartItem {
   menu_item_id: number;
@@ -40,8 +39,6 @@ export default function CanteenMenuPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("ONLINE");
-  const [showPaymentSelector, setShowPaymentSelector] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -88,7 +85,7 @@ export default function CanteenMenuPage() {
     );
   };
 
-  const handlePlaceOrderClick = () => {
+  const placeOrder = async () => {
     if (cart.length === 0) {
       setError("Add at least one item.");
       return;
@@ -101,28 +98,23 @@ export default function CanteenMenuPage() {
       }
       return;
     }
-    // Close cart and show payment method selector
-    setCartOpen(false);
-    setShowPaymentSelector(true);
-  };
-
-  const placeOrder = async () => {
+    
     setLoading(true);
     setError(null);
     try {
       const payload = {
         canteen_id: canteenId,
         items: cart.map((item) => ({ menu_item_id: item.menu_item_id, quantity: item.quantity })),
-        payment_method: paymentMethod,
+        payment_method: "ONLINE", // Always use UPI payment
       };
       const res = await apiFetch<OrderResponse>("/orders", {
         method: "POST",
         body: JSON.stringify(payload),
       });
+      // Redirect directly to order page
       router.push(`/orders/${res.order.id}`);
     } catch (err) {
       setError("Unable to place order. Try again.");
-      setShowPaymentSelector(false);
     } finally {
       setLoading(false);
     }
@@ -357,70 +349,15 @@ export default function CanteenMenuPage() {
                 </div>
               )}
               
-              {/* Continue Button */}
+              {/* Place Order Button */}
               <button
-                onClick={handlePlaceOrderClick}
-                className="w-full py-4 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-neutral-900 dark:text-white font-bold text-lg shadow-lg transition-all"
+                onClick={placeOrder}
+                disabled={loading}
+                className="w-full py-4 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-neutral-900 dark:text-white font-bold text-lg shadow-lg transition-all disabled:opacity-60"
               >
-                Continue to Payment
+                {loading ? "Placing Order..." : "Place Order"}
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Payment Method Selection Modal */}
-      {showPaymentSelector && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center sm:justify-center">
-          <div 
-            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-            onClick={() => setShowPaymentSelector(false)}
-          ></div>
-          
-          <div className="relative w-full sm:w-[500px] bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-t-3xl sm:rounded-3xl shadow-2xl p-6">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-neutral-900 dark:text-white">Select Payment Method</h2>
-              <button
-                onClick={() => setShowPaymentSelector(false)}
-                className="w-10 h-10 rounded-full bg-neutral-50 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 flex items-center justify-center transition-colors"
-              >
-                <span className="text-xl text-neutral-900 dark:text-white">✕</span>
-              </button>
-            </div>
-
-            {/* Payment Method Selector */}
-            <PaymentMethodSelector 
-              onSelect={setPaymentMethod}
-              selected={paymentMethod}
-            />
-
-            {/* Order Summary */}
-            <div className="mt-6 p-4 rounded-xl bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-neutral-600 dark:text-neutral-400">Items</span>
-                <span className="text-neutral-900 dark:text-white font-medium">{cart.reduce((sum, item) => sum + item.quantity, 0)}</span>
-              </div>
-              <div className="flex items-center justify-between pt-2 border-t border-neutral-200 dark:border-neutral-700">
-                <span className="text-neutral-900 dark:text-white font-semibold">Total</span>
-                <span className="text-2xl font-bold text-neutral-900 dark:text-white">₹{(total / 100).toFixed(2)}</span>
-              </div>
-            </div>
-
-            {error && (
-              <div className="mt-4 px-4 py-3 rounded-xl bg-red-500/20 border border-red-500/30">
-                <p className="text-sm font-medium text-red-400">{error}</p>
-              </div>
-            )}
-
-            {/* Confirm Button */}
-            <button
-              onClick={placeOrder}
-              disabled={loading}
-              className="mt-6 w-full py-4 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-neutral-900 dark:text-white font-bold text-lg shadow-lg transition-all disabled:opacity-60"
-            >
-              {loading ? "Placing Order..." : "Confirm & Place Order"}
-            </button>
           </div>
         </div>
       )}
