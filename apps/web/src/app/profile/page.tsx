@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import { User } from "@/lib/types";
 import { useAuth } from "@/components/AuthProvider";
@@ -11,7 +12,8 @@ interface Hostel {
 }
 
 export default function ProfilePage() {
-  const { user, updateUser } = useAuth();
+  const router = useRouter();
+  const { user, updateUser, logout } = useAuth();
   const [profile, setProfile] = useState<User | null>(null);
   const [hostels, setHostels] = useState<Hostel[]>([]);
   const [formData, setFormData] = useState({
@@ -22,6 +24,15 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push("/login");
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
+  };
 
   useEffect(() => {
     loadHostels();
@@ -217,6 +228,17 @@ export default function ProfilePage() {
             {loading ? "Updating..." : "Update Profile"}
           </button>
         </form>
+      </div>
+
+      {/* Logout Button */}
+      <div className="rounded-2xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 p-6">
+        <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">Account Actions</h2>
+        <button
+          onClick={handleLogout}
+          className="w-full rounded-xl border-2 border-red-500/30 bg-red-500/10 hover:bg-red-500/20 px-6 py-3 text-red-500 dark:text-red-400 font-medium transition-colors"
+        >
+          Logout
+        </button>
       </div>
     </div>
   );

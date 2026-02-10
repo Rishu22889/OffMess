@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/components/AuthProvider";
 
@@ -22,7 +23,8 @@ interface ActiveOrdersStats {
 }
 
 export default function AdminProfilePage() {
-  const { user, updateUser } = useAuth();
+  const router = useRouter();
+  const { user, updateUser, logout } = useAuth();
   const [profile, setProfile] = useState<CanteenProfile | null>(null);
   const [activeStats, setActiveStats] = useState<ActiveOrdersStats | null>(null);
   const [editData, setEditData] = useState<Partial<CanteenProfile>>({});
@@ -42,6 +44,15 @@ export default function AdminProfilePage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push("/login");
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
+  };
 
   const loadProfile = async () => {
     try {
@@ -503,6 +514,25 @@ export default function AdminProfilePage() {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Logout Section */}
+      <div className="rounded-3xl bg-gradient-to-br from-neutral-900 to-neutral-800 border-2 border-red-700 p-6 sm:p-8 shadow-xl">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-12 h-12 rounded-2xl bg-red-100 flex items-center justify-center">
+            <span className="text-2xl">🚪</span>
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-neutral-900 dark:text-white">Account Actions</h2>
+            <p className="text-sm text-neutral-600 dark:text-neutral-400">Logout from your account</p>
+          </div>
+        </div>
+        <button
+          onClick={handleLogout}
+          className="w-full sm:w-auto px-8 py-3 rounded-xl bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-neutral-900 dark:text-white font-bold shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all transform hover:scale-105"
+        >
+          🚪 Logout
+        </button>
       </div>
     </div>
   );
