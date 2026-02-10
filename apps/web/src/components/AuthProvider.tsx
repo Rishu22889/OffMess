@@ -17,8 +17,16 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const refresh = async () => {
+    // Don't refresh if we're in the middle of logging out
+    if (isLoggingOut) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+    
     try {
       const next = await fetchMe();
       setUser(next);
@@ -30,17 +38,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
-    // First set user to null immediately
+    // Set logging out flag to prevent refresh
+    setIsLoggingOut(true);
+    
+    // Clear user state immediately
     setUser(null);
     
-    // Then call the logout API
+    // Call the logout API (which will redirect)
     try {
       await doLogout();
     } catch (err) {
-      console.error("Logout API error:", err);
+      console.error("Logout error:", err);
+      // doLogout will handle the redirect even on error
     }
-    
-    // The doLogout function will handle the redirect
   };
 
   useEffect(() => {

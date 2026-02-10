@@ -248,31 +248,39 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
 
 @app.post("/auth/logout")
 def logout(response: Response):
-    # Delete cookie - must match exactly how it was set
-    cookie_params = {
-        "key": settings.cookie_name,
-        "path": "/",
-        "httponly": True,
-        "samesite": "none" if settings.frontend_url.startswith("https") else "lax",
-        "secure": settings.frontend_url.startswith("https"),
-    }
+    """
+    Logout endpoint - clears authentication cookie
+    Must match ALL parameters used when setting the cookie
+    """
+    # Get cookie parameters that match how we set them
+    is_production = settings.frontend_url.startswith("https")
     
-    # Delete the cookie
-    response.delete_cookie(**cookie_params)
-    
-    # Also try deleting without domain (for localhost)
+    # Method 1: Set cookie to empty with immediate expiry
     response.set_cookie(
         key=settings.cookie_name,
-        value="",
+        value="deleted",
         max_age=0,
         expires=0,
         path="/",
         httponly=True,
-        samesite="none" if settings.frontend_url.startswith("https") else "lax",
-        secure=settings.frontend_url.startswith("https"),
+        samesite="none" if is_production else "lax",
+        secure=is_production,
     )
     
-    return {"status": "ok"}
+    # Method 2: Also use delete_cookie
+    response.delete_cookie(
+        key=settings.cookie_name,
+        path="/",
+        samesite="none" if is_production else "lax",
+        secure=is_production,
+    )
+    
+    # Add headers to prevent caching
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    
+    return {"status": "ok", "message": "Logged out successfully"}
 
 
 class TokenExchangeRequest(BaseModel):
