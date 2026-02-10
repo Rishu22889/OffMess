@@ -29,8 +29,76 @@ export default function NavBar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-2 lg:gap-3">
+            {user?.role === "STUDENT" && (
+              <>
+                <Link 
+                  href="/orders" 
+                  className="px-3 lg:px-4 py-2 rounded-xl text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:text-orange-500 hover:bg-orange-500/10 transition-all"
+                >
+                  My Orders
+                </Link>
+                <Link 
+                  href="/profile" 
+                  className="px-3 lg:px-4 py-2 rounded-xl text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:text-orange-500 hover:bg-orange-500/10 transition-all"
+                >
+                  Profile
+                </Link>
+              </>
+            )}
+            {user?.role === "CANTEEN_ADMIN" && (
+              <>
+                <Link 
+                  href="/admin" 
+                  className="px-3 lg:px-4 py-2 rounded-xl text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:text-orange-500 hover:bg-orange-500/10 transition-all"
+                >
+                  Dashboard
+                </Link>
+                <Link 
+                  href="/admin/daily" 
+                  className="px-3 lg:px-4 py-2 rounded-xl text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:text-orange-500 hover:bg-orange-500/10 transition-all"
+                >
+                  Daily Orders
+                </Link>
+                <Link 
+                  href="/admin/profile" 
+                  className="px-3 lg:px-4 py-2 rounded-xl text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:text-orange-500 hover:bg-orange-500/10 transition-all"
+                >
+                  Profile
+                </Link>
+              </>
+            )}
+            {user?.role === "CAMPUS_ADMIN" && (
+              <>
+                <Link 
+                  href="/campus" 
+                  className="px-3 lg:px-4 py-2 rounded-xl text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:text-orange-500 hover:bg-orange-500/10 transition-all"
+                >
+                  Campus Stats
+                </Link>
+                <Link 
+                  href="/campus/hostels" 
+                  className="px-3 lg:px-4 py-2 rounded-xl text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:text-orange-500 hover:bg-orange-500/10 transition-all"
+                >
+                  Hostels
+                </Link>
+                <Link 
+                  href="/campus/mess-menu" 
+                  className="px-3 lg:px-4 py-2 rounded-xl text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:text-orange-500 hover:bg-orange-500/10 transition-all"
+                >
+                  Mess Menu
+                </Link>
+                <Link 
+                  href="/profile" 
+                  className="px-3 lg:px-4 py-2 rounded-xl text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:text-orange-500 hover:bg-orange-500/10 transition-all"
+                >
+                  Profile
+                </Link>
+              </>
+            )}
+            
             {user ? (
               <>
+                <div className="h-6 w-px bg-neutral-200 dark:bg-neutral-800 mx-2"></div>
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-100 dark:bg-neutral-800">
                   <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse-subtle"></div>
                   <span className="text-xs lg:text-sm text-neutral-700 dark:text-neutral-300 font-medium max-w-[150px] truncate">
