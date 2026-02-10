@@ -159,6 +159,22 @@ def health() -> dict:
     return {"status": "ok"}
 
 
+@app.get("/debug/check-user")
+def debug_check_user(email: str, db: Session = Depends(get_db)):
+    """Debug endpoint to check if a user exists"""
+    user = db.scalar(select(User).where(User.email == email))
+    if not user:
+        return {"exists": False, "email": email}
+    return {
+        "exists": True,
+        "email": user.email,
+        "role": user.role.value,
+        "canteen_id": user.canteen_id,
+        "name": user.name,
+        "has_password": bool(user.password_hash)
+    }
+
+
 class LoginRequest(BaseModel):
     email: Optional[str] = None
     roll_number: Optional[str] = None
@@ -1306,6 +1322,8 @@ def update_canteen_admin_email(
         # Generate temporary password (8 characters: letters + digits)
         temp_password = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(8))
         
+        print(f"Creating canteen admin with email: {new_email}, temp password: {temp_password}")
+        
         new_admin = User(
             role=UserRole.CANTEEN_ADMIN,
             email=new_email,
@@ -1318,6 +1336,8 @@ def update_canteen_admin_email(
         db.add(new_admin)
         db.commit()
         db.refresh(new_admin)
+        
+        print(f"Created user with ID: {new_admin.id}, email: {new_admin.email}")
         
         return {
             "status": "ok",
