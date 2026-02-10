@@ -300,6 +300,8 @@ def logout(response: Response):
     response.headers["Clear-Site-Data"] = '"cookies", "storage"'
     
     return {"status": "ok", "message": "Logged out successfully"}
+    
+    return {"status": "ok", "message": "Logged out successfully"}
 
 
 class TokenExchangeRequest(BaseModel):
