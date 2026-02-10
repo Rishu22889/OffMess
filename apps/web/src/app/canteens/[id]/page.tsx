@@ -264,65 +264,50 @@ export default function CanteenMenuPage() {
         })}
       </div>
 
-      {/* Floating Cart Button - Mobile Optimized */}
+      {/* Floating Cart Button - Circular in Corner */}
       {cart.length > 0 && (
         <button
           onClick={() => setCartOpen(true)}
-          className="fixed bottom-24 md:bottom-6 right-4 md:right-6 left-4 md:left-auto z-40 flex items-center justify-between md:justify-start gap-3 md:gap-3 px-6 md:px-6 py-5 md:py-4 rounded-3xl md:rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-black md:font-bold shadow-2xl shadow-orange-500/40 transition-all active:scale-[0.98] border-2 border-orange-400"
+          className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-40 w-16 h-16 md:w-14 md:h-14 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-black shadow-2xl shadow-orange-500/50 transition-all active:scale-90 border-2 border-orange-400 flex items-center justify-center"
         >
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <span className="text-3xl md:text-2xl">🛒</span>
-              <span className="absolute -top-2 -right-2 w-6 h-6 md:w-5 md:h-5 rounded-full bg-white text-orange-500 text-sm md:text-xs font-black flex items-center justify-center shadow-lg">
-                {cart.reduce((sum, item) => sum + item.quantity, 0)}
-              </span>
-            </div>
-            <div className="md:hidden">
-              <div className="text-base font-black">View Cart</div>
-              <div className="text-sm font-bold opacity-90">
-                {cart.reduce((sum, item) => sum + item.quantity, 0)} items
-              </div>
-            </div>
-            <div className="hidden md:block">
-              <div className="text-sm">Cart</div>
-              <div className="text-xs opacity-90">₹{(total / 100).toFixed(2)}</div>
-            </div>
-          </div>
-          <div className="text-2xl md:text-xl font-black">
-            ₹{(total / 100).toFixed(2)}
+          <div className="relative">
+            <span className="text-3xl md:text-2xl">🛒</span>
+            <span className="absolute -top-2 -right-2 w-6 h-6 md:w-5 md:h-5 rounded-full bg-white text-orange-500 text-xs font-black flex items-center justify-center shadow-lg border-2 border-orange-500">
+              {cart.reduce((sum, item) => sum + item.quantity, 0)}
+            </span>
           </div>
         </button>
       )}
 
-      {/* Cart Modal - Mobile Optimized Bottom Sheet */}
+      {/* Cart Modal - Centered Floating */}
       {cartOpen && (
-        <div className="fixed inset-0 z-50 flex items-end md:items-center md:justify-center animate-slide-up md:animate-none">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-0 animate-fade-in">
           <div 
             className="absolute inset-0 bg-black/60 md:bg-black/80 backdrop-blur-sm"
             onClick={() => setCartOpen(false)}
           ></div>
           
-          <div className="relative w-full md:w-[550px] bg-white dark:bg-neutral-900 rounded-t-[2rem] md:rounded-3xl shadow-2xl max-h-[85vh] md:max-h-[90vh] flex flex-col border-t-4 md:border-2 border-orange-500">
+          <div className="relative w-full max-w-md bg-white dark:bg-neutral-900 rounded-3xl md:rounded-3xl shadow-2xl max-h-[85vh] md:max-h-[90vh] flex flex-col border-2 border-orange-500 animate-scale-in">
             {/* Header - Gradient */}
-            <div className="flex-shrink-0 bg-gradient-to-r from-orange-500 to-orange-600 p-6 md:p-6 rounded-t-[2rem] md:rounded-t-3xl">
-              <div className="flex items-center justify-between mb-3 md:mb-2">
-                <h2 className="text-3xl md:text-2xl font-black md:font-bold text-white tracking-tight">
+            <div className="flex-shrink-0 bg-gradient-to-r from-orange-500 to-orange-600 p-5 md:p-6 rounded-t-3xl">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-2xl md:text-2xl font-black text-white tracking-tight">
                   Your Cart
                 </h2>
                 <button
                   onClick={() => setCartOpen(false)}
-                  className="w-12 h-12 md:w-10 md:h-10 rounded-2xl md:rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all active:scale-90"
+                  className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all active:scale-90"
                 >
-                  <span className="text-2xl md:text-xl text-white font-bold">✕</span>
+                  <span className="text-xl text-white font-bold">✕</span>
                 </button>
               </div>
-              <p className="text-base md:text-sm text-white/95 font-bold md:font-normal">
+              <p className="text-sm text-white/95 font-semibold">
                 {cart.reduce((sum, item) => sum + item.quantity, 0)} items · ₹{(total / 100).toFixed(2)}
               </p>
             </div>
 
             {/* Cart Items - Scrollable */}
-            <div className="flex-1 overflow-y-auto p-4 md:p-4 space-y-3 bg-neutral-50 dark:bg-neutral-900">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-neutral-50 dark:bg-neutral-900">
               <p className="text-xs font-black md:font-semibold text-neutral-600 dark:text-neutral-400 uppercase px-2 tracking-wider">
                 Items in Cart
               </p>
@@ -377,13 +362,13 @@ export default function CanteenMenuPage() {
             </div>
 
             {/* Footer - Checkout */}
-            <div className="flex-shrink-0 bg-white dark:bg-neutral-900 border-t-2 border-neutral-200 dark:border-neutral-800 p-5 md:p-4 space-y-4 md:space-y-3">
+            <div className="flex-shrink-0 bg-white dark:bg-neutral-900 border-t-2 border-neutral-200 dark:border-neutral-800 p-4 space-y-3 rounded-b-3xl">
               {/* Total */}
-              <div className="flex items-center justify-between px-4 md:px-2 py-4 md:py-3 bg-gradient-to-r from-neutral-100 to-neutral-50 dark:from-neutral-800 dark:to-neutral-800/80 rounded-2xl md:rounded-xl border-2 md:border border-neutral-200 dark:border-neutral-700">
-                <span className="text-neutral-700 dark:text-neutral-300 font-black md:font-medium text-base md:text-base">
+              <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-neutral-100 to-neutral-50 dark:from-neutral-800 dark:to-neutral-800/80 rounded-2xl border-2 md:border border-neutral-200 dark:border-neutral-700">
+                <span className="text-neutral-700 dark:text-neutral-300 font-black md:font-medium text-base">
                   Total Amount
                 </span>
-                <span className="text-3xl md:text-2xl font-black md:font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
+                <span className="text-2xl md:text-2xl font-black bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
                   ₹{(total / 100).toFixed(2)}
                 </span>
               </div>
@@ -400,7 +385,7 @@ export default function CanteenMenuPage() {
               <button
                 onClick={placeOrder}
                 disabled={loading}
-                className="w-full py-5 md:py-4 rounded-2xl md:rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-black md:font-bold text-lg md:text-lg shadow-2xl shadow-orange-500/40 transition-all disabled:opacity-60 active:scale-[0.98] border-2 border-orange-400"
+                className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-black text-lg shadow-2xl shadow-orange-500/40 transition-all disabled:opacity-60 active:scale-[0.98] border-2 border-orange-400"
               >
                 {loading ? "Placing Order..." : "Place Order →"}
               </button>
