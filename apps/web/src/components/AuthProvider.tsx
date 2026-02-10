@@ -27,6 +27,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     
+    // Don't refresh if we're on the login page (user just logged out)
+    if (typeof window !== 'undefined' && window.location.pathname === '/login') {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+    
     try {
       const next = await fetchMe();
       setUser(next);
@@ -51,6 +58,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error("Logout error:", err);
       // doLogout will handle the redirect even on error
     }
+    
+    // Keep isLoggingOut true to prevent any refresh attempts
+    // It will be reset when the page reloads at /login
   };
 
   useEffect(() => {
@@ -61,7 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(updatedUser);
   };
 
-  const value = useMemo(() => ({ user, loading, refresh, logout, updateUser }), [user, loading]);
+  const value = useMemo(() => ({ user, loading, refresh, logout, updateUser }), [user, loading, isLoggingOut]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

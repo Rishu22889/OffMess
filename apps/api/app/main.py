@@ -251,34 +251,53 @@ def logout(response: Response):
     """
     Logout endpoint - clears authentication cookie
     Must match ALL parameters used when setting the cookie
+    
+    CRITICAL: For cross-origin setups (Vercel + Render), cookies MUST be deleted
+    by the backend that set them. Frontend JavaScript cannot delete httpOnly cookies.
     """
     # Get cookie parameters that match how we set them
     is_production = settings.frontend_url.startswith("https")
     
-    # Method 1: Set cookie to empty with immediate expiry
+    # Method 1: Set cookie to empty with immediate expiry (past date)
     response.set_cookie(
         key=settings.cookie_name,
-        value="deleted",
-        max_age=0,
-        expires=0,
+        value="",  # Empty value
+        max_age=0,  # Expire immediately
+        expires=0,  # Also set expires to 0
+        path="/",
+        httponly=True,
+        samesite="none" if is_production else "lax",
+        secure=is_production,
+        domain=None,  # Let browser handle domain (same as when we set it)
+    )
+    
+    # Method 2: Also use delete_cookie with exact same parameters
+    response.delete_cookie(
+        key=settings.cookie_name,
+        path="/",
+        samesite="none" if is_production else "lax",
+        secure=is_production,
+        domain=None,
+    )
+    
+    # Method 3: Set another cookie with past expiry date as fallback
+    from datetime import datetime, timedelta
+    past_date = datetime.utcnow() - timedelta(days=365)
+    response.set_cookie(
+        key=settings.cookie_name,
+        value="",
+        expires=past_date,
         path="/",
         httponly=True,
         samesite="none" if is_production else "lax",
         secure=is_production,
     )
     
-    # Method 2: Also use delete_cookie
-    response.delete_cookie(
-        key=settings.cookie_name,
-        path="/",
-        samesite="none" if is_production else "lax",
-        secure=is_production,
-    )
-    
-    # Add headers to prevent caching
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    # Add headers to prevent caching and force re-authentication
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, private"
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
+    response.headers["Clear-Site-Data"] = '"cookies", "storage"'
     
     return {"status": "ok", "message": "Logged out successfully"}
 

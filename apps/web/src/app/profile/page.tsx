@@ -27,10 +27,15 @@ export default function ProfilePage() {
 
   const handleLogout = async () => {
     try {
+      // Just call logout - it will handle the redirect
       await logout();
-      router.push("/login");
+      // No need for router.push - logout() redirects with window.location.replace
     } catch (err) {
       console.error("Logout failed:", err);
+      // Force redirect even on error
+      if (typeof window !== 'undefined') {
+        window.location.replace("/login?t=" + Date.now());
+      }
     }
   };
 

@@ -10,15 +10,19 @@ export async function login(input: { email?: string; roll_number?: string; passw
 }
 
 export async function logout() {
+  // CRITICAL: For cross-origin setups (Vercel + Render), httpOnly cookies
+  // CANNOT be deleted by frontend JavaScript. The backend MUST delete them.
+  // We only clear local storage and redirect.
+  
   try {
-    // Call logout API
+    // Call logout API - this deletes the httpOnly cookie on the backend
     await apiFetch("/auth/logout", { method: "POST" });
   } catch (err) {
     console.error("Logout API call failed:", err);
     // Continue with logout even if API fails
   }
   
-  // Clear all browser storage
+  // Clear all browser storage (but NOT cookies - backend handles that)
   if (typeof window !== 'undefined') {
     // Clear localStorage
     try {
@@ -34,18 +38,13 @@ export async function logout() {
       console.error("Failed to clear sessionStorage:", e);
     }
     
-    // Clear all cookies from this domain
-    try {
-      document.cookie.split(";").forEach(function(c) { 
-        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
-      });
-    } catch (e) {
-      console.error("Failed to clear cookies:", e);
-    }
+    // DO NOT try to delete cookies here - httpOnly cookies cannot be deleted by JavaScript
+    // The backend /auth/logout endpoint handles cookie deletion
     
     // Force full page reload to login (clears all state and cache)
     // Use replace to remove current page from history
-    window.location.replace("/login");
+    // Add timestamp to force fresh load and prevent cache
+    window.location.replace("/login?t=" + Date.now());
   }
 }
 
