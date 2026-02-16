@@ -27,13 +27,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     
-    // Don't refresh if we're on the login page (user just logged out)
-    if (typeof window !== 'undefined' && window.location.pathname === '/login') {
-      setUser(null);
-      setLoading(false);
-      return;
-    }
-    
     try {
       const next = await fetchMe();
       setUser(next);
