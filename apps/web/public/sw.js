@@ -32,6 +32,22 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event - network first, fallback to cache
 self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+  
+  // NEVER cache authentication or API requests
+  if (
+    url.pathname.startsWith('/auth/') ||
+    url.pathname.startsWith('/api/') ||
+    url.pathname === '/login' ||
+    url.hostname.includes('onrender.com') || // Backend API
+    event.request.method !== 'GET'
+  ) {
+    // Always fetch from network for auth/API requests
+    event.respondWith(fetch(event.request));
+    return;
+  }
+  
+  // For other requests, use network-first strategy
   event.respondWith(
     fetch(event.request)
       .then((response) => {
