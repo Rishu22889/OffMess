@@ -517,7 +517,7 @@ export default function CampusAdminPage() {
               <div className="flex gap-2 ml-4">
                 <button
                   onClick={() => setExpandedCanteen(expandedCanteen === canteen.id ? null : canteen.id)}
-                  className="px-4 py-2 rounded-xl border-2 border-neutral-200 dark:border-neutral-700 text-sm text-neutral-900 dark:text-white hover:bg-neutral-50 dark:bg-neutral-800"
+                  className="px-4 py-2 rounded-xl border-2 border-neutral-200 dark:border-neutral-700 text-sm text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
                 >
                   {expandedCanteen === canteen.id ? 'Hide' : 'Manage'} Menu
                 </button>
