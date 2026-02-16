@@ -191,6 +191,17 @@ def debug_test_password(email: str, password: str, db: Session = Depends(get_db)
     }
 
 
+@app.get("/debug/check-auth")
+def debug_check_auth(user: User = Depends(get_current_user)):
+    """Debug endpoint to check if user is authenticated"""
+    return {
+        "authenticated": True,
+        "user_id": user.id,
+        "email": user.email,
+        "role": user.role.value
+    }
+
+
 class LoginRequest(BaseModel):
     email: Optional[str] = None
     roll_number: Optional[str] = None
@@ -346,8 +357,9 @@ def logout(response: Response):
     response.headers["Expires"] = "0"
     response.headers["Clear-Site-Data"] = '"cookies", "storage"'
     
-    return {"status": "ok", "message": "Logged out successfully"}
+    print(f"Logout called - cookie deleted, headers set")
     
+    return {"status": "ok", "message": "Logged out successfully"}
     return {"status": "ok", "message": "Logged out successfully"}
 
 
