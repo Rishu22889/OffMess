@@ -175,6 +175,22 @@ def debug_check_user(email: str, db: Session = Depends(get_db)):
     }
 
 
+@app.get("/debug/test-password")
+def debug_test_password(email: str, password: str, db: Session = Depends(get_db)):
+    """Debug endpoint to test password verification"""
+    user = db.scalar(select(User).where(User.email == email))
+    if not user:
+        return {"error": "User not found"}
+    
+    password_valid = verify_password(password, user.password_hash)
+    return {
+        "email": user.email,
+        "password_valid": password_valid,
+        "password_hash_length": len(user.password_hash),
+        "password_length": len(password)
+    }
+
+
 class LoginRequest(BaseModel):
     email: Optional[str] = None
     roll_number: Optional[str] = None
