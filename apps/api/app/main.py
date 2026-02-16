@@ -185,13 +185,28 @@ class LoginRequest(BaseModel):
 def login(payload: LoginRequest, response: Response, db: Session = Depends(get_db)):
     if not payload.email and not payload.roll_number:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email or roll number required")
+    
+    print(f"Login attempt - Email: {payload.email}, Roll: {payload.roll_number}")
+    
     user = None
     if payload.email:
         user = db.scalar(select(User).where(User.email == payload.email))
+        print(f"User found by email: {user is not None}")
     if not user and payload.roll_number:
         user = db.scalar(select(User).where(User.roll_number == payload.roll_number))
-    if not user or not verify_password(payload.password, user.password_hash):
+        print(f"User found by roll: {user is not None}")
+    
+    if not user:
+        print(f"No user found for email: {payload.email}")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+    
+    print(f"Verifying password for user: {user.email}, role: {user.role}")
+    password_valid = verify_password(payload.password, user.password_hash)
+    print(f"Password valid: {password_valid}")
+    
+    if not password_valid:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+    
     token = create_access_token(user.id, user.role.value)
     response.set_cookie(
         settings.cookie_name,
