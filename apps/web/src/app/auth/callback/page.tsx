@@ -42,14 +42,8 @@ function AuthCallbackContent() {
           body: JSON.stringify({ token }),
         });
 
-        // Refresh auth state and wait for it to complete
-        await refresh();
-        
-        // Add a small delay to ensure state is updated
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Redirect to home page
-        router.push("/");
+        // Force full page reload to home page (this ensures auth state is fresh)
+        window.location.replace("/");
       } catch (err) {
         console.error("Auth callback error:", err);
         setError("Authentication failed. Please try again.");
