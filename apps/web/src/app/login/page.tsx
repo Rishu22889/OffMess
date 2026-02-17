@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { login } from "@/lib/auth";
 import { useAuth } from "@/components/AuthProvider";
@@ -9,11 +9,25 @@ type UserType = "student" | "admin" | null;
 
 export default function LoginPage() {
   const router = useRouter();
-  const { refresh } = useAuth();
+  const { user, loading, refresh } = useAuth();
   const [userType, setUserType] = useState<UserType>(null);
   const [value, setValue] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!loading && user) {
+      // User is already logged in, redirect based on role
+      if (user.role === "CANTEEN_ADMIN") {
+        router.replace("/admin");
+      } else if (user.role === "CAMPUS_ADMIN") {
+        router.replace("/campus");
+      } else {
+        router.replace("/");
+      }
+    }
+  }, [user, loading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
