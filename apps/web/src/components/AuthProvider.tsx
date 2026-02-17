@@ -27,6 +27,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     
+    // Check if user recently logged out (within last 5 seconds)
+    if (typeof window !== 'undefined') {
+      const logoutTime = localStorage.getItem('logout_time');
+      if (logoutTime) {
+        const timeSinceLogout = Date.now() - parseInt(logoutTime);
+        if (timeSinceLogout < 5000) { // 5 seconds
+          // User just logged out, don't try to refresh
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+        // Clear old logout flag
+        localStorage.removeItem('logout_time');
+      }
+    }
+    
     try {
       const next = await fetchMe();
       setUser(next);

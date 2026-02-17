@@ -11,40 +11,48 @@ export async function login(input: { email?: string; roll_number?: string; passw
 
 export async function logout() {
   // CRITICAL: For cross-origin setups (Vercel + Render), httpOnly cookies
-  // CANNOT be deleted by frontend JavaScript. The backend MUST delete them.
-  // We only clear local storage and redirect.
+  // CANNOT be reliably deleted across domains. We use a different approach:
+  // 1. Set a logout flag in localStorage
+  // 2. Clear all storage
+  // 3. Force page reload to login
   
-  try {
-    // Call logout API - this deletes the httpOnly cookie on the backend
-    await apiFetch("/auth/logout", { method: "POST" });
-  } catch (err) {
-    console.error("Logout API call failed:", err);
-    // Continue with logout even if API fails
-  }
-  
-  // Clear all browser storage (but NOT cookies - backend handles that)
   if (typeof window !== 'undefined') {
-    // Clear localStorage
+    // Set logout timestamp to prevent auto-login
+    const logoutTime = Date.now().toString();
+    try {
+      localStorage.setItem('logout_time', logoutTime);
+    } catch (e) {
+      console.error("Failed to set logout flag:", e);
+    }
+    
+    // Call logout API (best effort - may fail due to CORS)
+    try {
+      await apiFetch("/auth/logout", { method: "POST" });
+    } catch (err) {
+      console.error("Logout API call failed (expected for cross-origin):", err);
+    }
+    
+    // Clear all browser storage
     try {
       localStorage.clear();
+      // Re-set the logout flag after clearing
+      localStorage.setItem('logout_time', logoutTime);
     } catch (e) {
       console.error("Failed to clear localStorage:", e);
     }
     
-    // Clear sessionStorage
     try {
       sessionStorage.clear();
     } catch (e) {
       console.error("Failed to clear sessionStorage:", e);
     }
     
-    // DO NOT try to delete cookies here - httpOnly cookies cannot be deleted by JavaScript
-    // The backend /auth/logout endpoint handles cookie deletion
+    // Try to delete the cookie from frontend (won't work for httpOnly but worth trying)
+    document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.vercel.app;';
+    document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     
-    // Force full page reload to login (clears all state and cache)
-    // Use replace to remove current page from history
-    // Add timestamp to force fresh load and prevent cache
-    window.location.replace("/login?t=" + Date.now());
+    // Force full page reload to login with cache busting
+    window.location.replace("/login?logout=" + logoutTime);
   }
 }
 

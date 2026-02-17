@@ -18,6 +18,14 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    
+    // Clear any logout flags before logging in
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem('logout_time');
+      } catch (e) {}
+    }
+    
     try {
       // Admin login always uses email
       const input = { email: value, password };
