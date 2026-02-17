@@ -15,6 +15,18 @@ function AuthCallbackContent() {
   useEffect(() => {
     const handleCallback = async () => {
       try {
+        // CRITICAL: Clear logout flags before OAuth login
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.removeItem('user_logged_out');
+            localStorage.removeItem('logout_time');
+            sessionStorage.removeItem('user_logged_out');
+            sessionStorage.removeItem('logout_time');
+          } catch (e) {
+            console.error('Failed to clear logout flags:', e);
+          }
+        }
+        
         // Get token from URL parameter
         const token = searchParams.get("token");
         
