@@ -20,27 +20,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const refresh = async () => {
+    // CRITICAL: Check if user is logged out FIRST before any API calls
+    if (typeof window !== 'undefined') {
+      const isLoggedOut = localStorage.getItem('user_logged_out') === 'true' || 
+                         sessionStorage.getItem('user_logged_out') === 'true';
+      
+      if (isLoggedOut) {
+        console.log('User is logged out, skipping refresh');
+        setUser(null);
+        setLoading(false);
+        // Redirect to login if not already there
+        if (window.location.pathname !== '/login') {
+          window.location.replace('/login');
+        }
+        return;
+      }
+    }
+    
     // Don't refresh if we're in the middle of logging out
     if (isLoggingOut) {
       setUser(null);
       setLoading(false);
       return;
-    }
-    
-    // Check if user recently logged out (within last 5 seconds)
-    if (typeof window !== 'undefined') {
-      const logoutTime = localStorage.getItem('logout_time');
-      if (logoutTime) {
-        const timeSinceLogout = Date.now() - parseInt(logoutTime);
-        if (timeSinceLogout < 5000) { // 5 seconds
-          // User just logged out, don't try to refresh
-          setUser(null);
-          setLoading(false);
-          return;
-        }
-        // Clear old logout flag
-        localStorage.removeItem('logout_time');
-      }
     }
     
     try {

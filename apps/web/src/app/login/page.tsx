@@ -19,11 +19,16 @@ export default function LoginPage() {
     e.preventDefault();
     setError(null);
     
-    // Clear any logout flags before logging in
+    // CRITICAL: Clear ALL logout flags before logging in
     if (typeof window !== 'undefined') {
       try {
+        localStorage.removeItem('user_logged_out');
         localStorage.removeItem('logout_time');
-      } catch (e) {}
+        sessionStorage.removeItem('user_logged_out');
+        sessionStorage.removeItem('logout_time');
+      } catch (e) {
+        console.error('Failed to clear logout flags:', e);
+      }
     }
     
     try {

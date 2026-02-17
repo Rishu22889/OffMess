@@ -55,6 +55,16 @@ export default function AdminDashboard() {
 
   // Redirect if not authenticated or not a canteen admin
   useEffect(() => {
+    // Check logout flag FIRST
+    if (typeof window !== 'undefined') {
+      const isLoggedOut = localStorage.getItem('user_logged_out') === 'true' || 
+                         sessionStorage.getItem('user_logged_out') === 'true';
+      if (isLoggedOut) {
+        window.location.href = '/login';
+        return;
+      }
+    }
+    
     if (!authLoading && (!user || user.role !== "CANTEEN_ADMIN")) {
       window.location.href = '/login';
     }
